@@ -1,0 +1,3 @@
+Bundle-Name: gestion-documents-rest-client
+Bundle-SymbolicName: com.liferay.gwenod.rest.client
+Bundle-Version: 1.0.0

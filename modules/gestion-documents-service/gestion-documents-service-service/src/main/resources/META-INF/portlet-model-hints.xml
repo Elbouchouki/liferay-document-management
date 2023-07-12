@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+<model-hints>
+	<model name="com.liferay.gwenod.gestiondocuments.service.model.Document">
+		<field name="uuid" type="String" />
+		<field name="documentId" type="long" />
+		<field name="groupId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="userName" type="String" />
+		<field name="createDate" type="Date" />
+		<field name="modifiedDate" type="Date" />
+		<field name="modifiedBy" type="long" />
+		<field name="city" type="String" />
+		<field name="address" type="String" />
+		<field name="type" type="String" />
+		<field name="description" type="String" />
+		<field name="title" type="String" />
+		<field name="filepath" type="String">
+			<hint name="max-length">255</hint>
+		</field>
+		<field name="filename" type="String" />
+		<field name="fileversion" type="long" />
+		<field name="tags" type="String" />
+	</model>
+	<model name="com.liferay.gwenod.gestiondocuments.service.model.DocumentHistory">
+		<field name="uuid" type="String" />
+		<field name="historyId" type="long" />
+		<field name="versionDate" type="Date" />
+		<field name="versionModifier" type="long" />
+		<field name="documentId" type="long" />
+		<field name="title" type="String" />
+		<field name="filepath" type="String" />
+		<field name="filename" type="String" />
+		<field name="fileversion" type="long" />
+		<field name="tags" type="String" />
+		<field name="city" type="String" />
+		<field name="address" type="String" />
+		<field name="description" type="String" />
+	</model>
+</model-hints>

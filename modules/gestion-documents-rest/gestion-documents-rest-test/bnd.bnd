@@ -1,0 +1,5 @@
+Bundle-Name: gestion-documents-rest-test
+Bundle-SymbolicName: com.liferay.gwenod.rest.test
+Bundle-Version: 1.0.0
+-includeresource: com.liferay.gwenod.rest.client.jar=../gestion-documents-rest-client/build/libs/com.liferay.gwenod.rest.client-1.0.0.jar;lib:=true
+-provider-policy: ${replacestring;${range;[==,==]};.*,(.*)];$1}

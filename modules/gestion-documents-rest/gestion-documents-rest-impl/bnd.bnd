@@ -1,0 +1,3 @@
+Bundle-Name: gestion-documents-rest-impl
+Bundle-SymbolicName: com.liferay.gwenod.rest.impl
+Bundle-Version: 1.0.0
