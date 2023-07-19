@@ -168,6 +168,7 @@ public abstract class BaseDocumentResourceTestCase {
 
 		document.setAddress(regex);
 		document.setCity(regex);
+		document.setDescription(regex);
 		document.setTitle(regex);
 
 		String json = DocumentSerDes.toJSON(document);
@@ -178,6 +179,7 @@ public abstract class BaseDocumentResourceTestCase {
 
 		Assert.assertEquals(regex, document.getAddress());
 		Assert.assertEquals(regex, document.getCity());
+		Assert.assertEquals(regex, document.getDescription());
 		Assert.assertEquals(regex, document.getTitle());
 	}
 
@@ -198,11 +200,6 @@ public abstract class BaseDocumentResourceTestCase {
 
 	@Test
 	public void testUpdateDocument() throws Exception {
-		Assert.assertTrue(false);
-	}
-
-	@Test
-	public void testGetDocumentFile() throws Exception {
 		Assert.assertTrue(false);
 	}
 
@@ -303,6 +300,14 @@ public abstract class BaseDocumentResourceTestCase {
 
 			if (Objects.equals("createDate", additionalAssertFieldName)) {
 				if (document.getCreateDate() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("description", additionalAssertFieldName)) {
+				if (document.getDescription() == null) {
 					valid = false;
 				}
 
@@ -490,6 +495,17 @@ public abstract class BaseDocumentResourceTestCase {
 			if (Objects.equals("createDate", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
 						document1.getCreateDate(), document2.getCreateDate())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("description", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						document1.getDescription(),
+						document2.getDescription())) {
 
 					return false;
 				}
@@ -708,6 +724,14 @@ public abstract class BaseDocumentResourceTestCase {
 			return sb.toString();
 		}
 
+		if (entityFieldName.equals("description")) {
+			sb.append("'");
+			sb.append(String.valueOf(document.getDescription()));
+			sb.append("'");
+
+			return sb.toString();
+		}
+
 		if (entityFieldName.equals("documentId")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
@@ -814,6 +838,8 @@ public abstract class BaseDocumentResourceTestCase {
 				address = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				city = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				createDate = RandomTestUtil.nextDate();
+				description = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
 				documentId = RandomTestUtil.randomLong();
 				modifiedDate = RandomTestUtil.nextDate();
 				title = StringUtil.toLowerCase(RandomTestUtil.randomString());

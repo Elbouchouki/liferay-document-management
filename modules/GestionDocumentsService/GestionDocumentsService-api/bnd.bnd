@@ -1,0 +1,10 @@
+Bundle-Name: GestionDocumentsService-api
+Bundle-SymbolicName: com.liferay.gwenod.gd.service.api
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.liferay.gwenod.gd.service.exception,\
+	com.liferay.gwenod.gd.service.model,\
+	com.liferay.gwenod.gd.service.service,\
+	com.liferay.gwenod.gd.service.service.persistence
+-check: EXPORTS
+-includeresource: META-INF/service.xml=../GestionDocumentsService-service/service.xml

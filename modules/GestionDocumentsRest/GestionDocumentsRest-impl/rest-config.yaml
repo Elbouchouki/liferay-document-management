@@ -1,0 +1,10 @@
+apiDir: "../GestionDocumentsRest-api/src/main/java"
+apiPackagePath: "com.liferay.gwenod.gd.rest"
+application:
+  baseURI: "/GestionDocumentsRest"
+  className: "GestionDocumentsRestApplication"
+  name: "GestionDocumentsRest"
+author: "elbou"
+clientDir: "../GestionDocumentsRest-client/src/main/java"
+testDir: "../GestionDocumentsRest-test/src/testIntegration/java"
+generateGraphQL: false

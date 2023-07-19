@@ -71,6 +71,20 @@ public class DocumentCreationRequestSerDes {
 			sb.append("\"");
 		}
 
+		if (documentCreationRequest.getDescription() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"description\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(documentCreationRequest.getDescription()));
+
+			sb.append("\"");
+		}
+
 		if (documentCreationRequest.getFile() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -202,6 +216,15 @@ public class DocumentCreationRequestSerDes {
 			map.put("city", String.valueOf(documentCreationRequest.getCity()));
 		}
 
+		if (documentCreationRequest.getDescription() == null) {
+			map.put("description", null);
+		}
+		else {
+			map.put(
+				"description",
+				String.valueOf(documentCreationRequest.getDescription()));
+		}
+
 		if (documentCreationRequest.getFile() == null) {
 			map.put("file", null);
 		}
@@ -278,6 +301,12 @@ public class DocumentCreationRequestSerDes {
 			else if (Objects.equals(jsonParserFieldName, "city")) {
 				if (jsonParserFieldValue != null) {
 					documentCreationRequest.setCity(
+						(String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "description")) {
+				if (jsonParserFieldValue != null) {
+					documentCreationRequest.setDescription(
 						(String)jsonParserFieldValue);
 				}
 			}

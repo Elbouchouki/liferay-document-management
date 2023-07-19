@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<model-hints>
+	<model name="com.liferay.gwenod.gd.service.model.GestionDocument">
+		<field name="id" type="long" />
+	</model>
+</model-hints>

@@ -1,0 +1,6 @@
+Bundle-Name: GestionDocumentsRest-api
+Bundle-SymbolicName: com.liferay.gwenod.gd.rest.api
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.liferay.gwenod.gd.rest.dto.v1_0,\
+	com.liferay.gwenod.gd.rest.resource.v1_0

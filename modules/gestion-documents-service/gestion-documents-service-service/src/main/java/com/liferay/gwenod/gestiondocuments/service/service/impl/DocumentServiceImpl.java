@@ -67,6 +67,9 @@ public class DocumentServiceImpl extends DocumentServiceBaseImpl {
     }
 
     public List<Document> getUserDocuments(ServiceContext serviceContext) {
+        System.out.println("DocumentServiceImpl.getUserDocuments");
+        System.out.println("serviceContext.getUserId() : " + serviceContext.getUserId());
+        System.out.println("serviceContext.getScopeGroupId() : " + serviceContext.getScopeGroupId());
         return documentLocalService.getUserDocuments(serviceContext);
     }
 
@@ -82,7 +85,7 @@ public class DocumentServiceImpl extends DocumentServiceBaseImpl {
         return documentLocalService.getDocumentFile(documentId, serviceContext);
     }
 
-    
+
     public Document deleteUserDocument(long documentId, ServiceContext serviceContext) throws Exception {
         return documentLocalService.deleteUserDocument(documentId, serviceContext);
     }

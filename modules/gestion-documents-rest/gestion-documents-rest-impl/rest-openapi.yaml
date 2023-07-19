@@ -31,6 +31,8 @@ components:
           type: string
         address:
           type: string
+        description:
+          type: string
         type:
           type: string
           enum: [ "POA", "POI" ]
@@ -97,6 +99,8 @@ components:
         title:
           type: string
         city:
+          type: string
+        description:
           type: string
         address:
           type: string
@@ -289,27 +293,6 @@ paths:
             application/xml:
               schema:
                 $ref: "#/components/schemas/Error"
-  "/document/{documentId}/file":
-    get:
-      operationId: getDocumentFile
-      summary: "Get a document file"
-      tags: [ "Document" ]
-      parameters:
-        - name: documentId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        200:
-          description: "OK"
-          content:
-            application/octet-stream:
-              schema:
-                type: string
-                format: binary
-
   "/document/{documentId}/history":
     get:
       operationId: getDocumentHistory

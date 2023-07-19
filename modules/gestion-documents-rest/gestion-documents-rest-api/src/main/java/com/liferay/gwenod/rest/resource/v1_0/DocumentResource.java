@@ -53,8 +53,6 @@ public interface DocumentResource {
 	public Response updateDocument(Long documentId, MultipartBody multipartBody)
 		throws Exception;
 
-	public Response getDocumentFile(Long documentId) throws Exception;
-
 	public Object getDocumentHistory(Long documentId) throws Exception;
 
 	public Object getDocuments(String title, String[] tags) throws Exception;
