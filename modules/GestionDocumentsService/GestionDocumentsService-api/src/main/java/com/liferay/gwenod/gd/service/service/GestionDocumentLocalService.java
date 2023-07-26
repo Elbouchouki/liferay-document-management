@@ -14,7 +14,7 @@
 
 package com.liferay.gwenod.gd.service.service;
 
-import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.*;
 import com.liferay.document.library.kernel.service.*;
 import com.liferay.dynamic.data.mapping.kernel.*;
 import com.liferay.gwenod.gd.service.model.GestionDocument;
@@ -26,7 +26,7 @@ import com.liferay.portal.kernel.dao.orm.Projection;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.model.PersistedModel;
-import com.liferay.portal.kernel.search.Document;
+import com.liferay.portal.kernel.search.*;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.service.BaseLocalService;
@@ -83,7 +83,8 @@ public interface GestionDocumentLocalService
 	@Indexable(type = IndexableType.REINDEX)
 	public GestionDocument addGestionDocument(GestionDocument gestionDocument);
 
-	public DLFileEntry createDocument(
+	@Indexable(type = IndexableType.REINDEX)
+	public com.liferay.document.library.kernel.model.DLFileEntry createDocument(
 			String filename, String title, String description, String changeLog,
 			BinaryFile file, String type, String city, String address,
 			List<String> tags, ServiceContext serviceContext)
@@ -104,7 +105,9 @@ public interface GestionDocumentLocalService
 	public PersistedModel createPersistedModel(Serializable primaryKeyObj)
 		throws PortalException;
 
-	public void deleteDocument(Long documentId) throws PortalException;
+	@Indexable(type = IndexableType.DELETE)
+	public void deleteDocument(Long documentId, ServiceContext serviceContext)
+		throws PortalException;
 
 	/**
 	 * Deletes the gestion document from the database. Also notifies the appropriate model listeners.
@@ -223,7 +226,9 @@ public interface GestionDocumentLocalService
 	public ActionableDynamicQuery getActionableDynamicQuery();
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public DLFileEntry getDocument(Long documentId) throws PortalException;
+	public com.liferay.document.library.kernel.model.DLFileEntry getDocument(
+			Long documentId)
+		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<com.liferay.document.library.kernel.model.DLFileVersion>
@@ -231,7 +236,7 @@ public interface GestionDocumentLocalService
 		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<Document> getDocuments(
+	public List<com.liferay.portal.kernel.search.Document> getDocuments(
 			String title, String[] tags, ServiceContext serviceContext)
 		throws PortalException;
 
@@ -285,7 +290,15 @@ public interface GestionDocumentLocalService
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
 		throws PortalException;
 
-	public DLFileEntry updateDocument(
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<com.liferay.document.library.kernel.model.DLFileEntry>
+			searchByKeywords(
+				long userId, String keywords, String fileType, int start,
+				int end, ServiceContext serviceContext)
+		throws PortalException;
+
+	@Indexable(type = IndexableType.REINDEX)
+	public com.liferay.document.library.kernel.model.DLFileEntry updateDocument(
 			Long documentId, String filename, String title, String description,
 			String changeLog, BinaryFile file, String city, String address,
 			List<String> tags, ServiceContext serviceContext)

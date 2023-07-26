@@ -95,8 +95,12 @@ public class GestionDocumentLocalServiceUtil {
 		return getService().createPersistedModel(primaryKeyObj);
 	}
 
-	public static void deleteDocument(Long documentId) throws PortalException {
-		getService().deleteDocument(documentId);
+	public static void deleteDocument(
+			Long documentId,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws PortalException {
+
+		getService().deleteDocument(documentId, serviceContext);
 	}
 
 	/**
@@ -328,6 +332,17 @@ public class GestionDocumentLocalServiceUtil {
 		throws PortalException {
 
 		return getService().getPersistedModel(primaryKeyObj);
+	}
+
+	public static List<com.liferay.document.library.kernel.model.DLFileEntry>
+			searchByKeywords(
+				long userId, String keywords, String fileType, int start,
+				int end,
+				com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws PortalException {
+
+		return getService().searchByKeywords(
+			userId, keywords, fileType, start, end, serviceContext);
 	}
 
 	public static com.liferay.document.library.kernel.model.DLFileEntry

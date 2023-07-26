@@ -20,20 +20,29 @@ import com.liferay.dynamic.data.mapping.kernel.*;
 import com.liferay.gwenod.gd.service.service.base.GestionDocumentLocalServiceBaseImpl;
 import com.liferay.portal.aop.AopService;
 
+import com.liferay.portal.kernel.audit.AuditMessage;
+import com.liferay.portal.kernel.audit.AuditRouter;
+import com.liferay.portal.kernel.exception.ModelListenerException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
-import com.liferay.portal.kernel.search.Document;
-import com.liferay.portal.kernel.search.Hits;
-import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.*;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.security.audit.event.generators.constants.EventTypes;
 import com.liferay.portal.vulcan.multipart.BinaryFile;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Elbouchouki Ahmed
@@ -44,6 +53,11 @@ import java.util.*;
 )
 public class GestionDocumentLocalServiceImpl
         extends GestionDocumentLocalServiceBaseImpl {
+
+    @Reference
+    private AuditRouter _auditRouter;
+
+    @Indexable(type = IndexableType.REINDEX)
     public com.liferay.document.library.kernel.model.DLFileEntry createDocument(
             String filename,
             String title,
@@ -85,6 +99,7 @@ public class GestionDocumentLocalServiceImpl
                 null, null, serviceContext
         );
 
+
         Map<String, DDMFormValues> _ddmFormValuesMap = getMappedValues(
                 dlFileEntryType,
                 type,
@@ -92,19 +107,28 @@ public class GestionDocumentLocalServiceImpl
                 Optional.ofNullable(address)
         );
 
-        return DLFileEntryLocalServiceUtil.updateFileEntry(
+        DLFileEntry dlFileEntry = DLFileEntryLocalServiceUtil.updateFileEntry(
                 _userId, fileEntry.getFileEntryId(), _sourceFileName,
                 _mimeType, _title, _urlTitle, _description,
                 _changeLog,
-                com.liferay.document.library.kernel.model.DLVersionNumberIncrease.NONE,
+                DLVersionNumberIncrease.NONE,
                 dlFileEntryType.getFileEntryTypeId(),
                 _ddmFormValuesMap,
                 null, null, _size,
                 null, null,
                 serviceContext
         );
+
+        this.audit(
+                EventTypes.ADD,
+                dlFileEntry,
+                userLocalService.getUser(_userId)
+        );
+
+        return dlFileEntry;
     }
 
+    @Indexable(type = IndexableType.REINDEX)
     public com.liferay.document.library.kernel.model.DLFileEntry updateDocument(
             Long documentId,
             String filename,
@@ -147,7 +171,7 @@ public class GestionDocumentLocalServiceImpl
                 _inputStream.readAllBytes(), null, null, serviceContext
         );
 
-        return DLFileEntryLocalServiceUtil.updateFileEntry(
+        DLFileEntry fileEntry = DLFileEntryLocalServiceUtil.updateFileEntry(
                 _userId, _fileEntryId, _sourceFileName, _mimeType,
                 _title, _urlTitle, _description, _changeLog, DLVersionNumberIncrease.NONE,
                 _fileEntryTypeId, _ddmFormValuesMap, null, null, _size,
@@ -155,6 +179,12 @@ public class GestionDocumentLocalServiceImpl
                 serviceContext
 
         );
+        this.audit(
+                EventTypes.UPDATE,
+                fileEntry,
+                userLocalService.getUser(_userId)
+        );
+        return fileEntry;
     }
 
     public com.liferay.document.library.kernel.model.DLFileEntry getDocument(Long documentId) throws PortalException {
@@ -167,6 +197,63 @@ public class GestionDocumentLocalServiceImpl
         return DLFileVersionLocalServiceUtil.getFileVersions(documentId, 0);
     }
 
+    public List<DLFileEntry> searchByKeywords(
+            long userId,
+            String keywords,
+            String fileType,
+            int start,
+            int end,
+            ServiceContext serviceContext
+    ) throws PortalException {
+        List<DLFileEntry> dlFileEntries = new ArrayList<>();
+        Indexer<DLFileEntry> indexer = IndexerRegistryUtil.getIndexer(DLFileEntryConstants.getClassName());
+        SearchContext sc = new SearchContext();
+        sc.setStart(start);
+        sc.setEnd(end);
+        sc.setUserId(userId);
+        sc.setCompanyId(serviceContext.getCompanyId());
+        sc.setGroupIds(new long[]{serviceContext.getScopeGroupId()});
+        sc.setSorts(new Sort(Field.MODIFIED_DATE, Sort.LONG_TYPE, true));
+        Hits hits = indexer.search(sc);
+        List<String> keywordsList = Arrays.asList(keywords.split(" "));
+        for (Document doc : hits.toList()) {
+            long fileEntryId = GetterUtil.getLong(doc.get("entryClassPK"));
+            DLFileEntry fileEntry = DLFileEntryLocalServiceUtil
+                    .getFileEntry(fileEntryId);
+            AtomicBoolean canAdd = new AtomicBoolean(false);
+            Map<String, DDMFormValues> ddmFormValuesMap = fileEntry.getDDMFormValuesMap(
+                    fileEntry.getLatestFileVersion(false).getFileVersionId()
+            );
+
+            if (fileType != null && !fileType.isEmpty() && !fileType.equals("ALL"))
+                if (!fileEntry.getDLFileEntryType().getName(Locale.getDefault()).equals(fileType))
+                    continue;
+
+
+            keywordsList.forEach(
+                    keyword -> {
+                        if (
+                                fileEntry.getTitle().toLowerCase().contains(keyword.toLowerCase())
+                                        || fileEntry.getDescription().toLowerCase().contains(keyword.toLowerCase())
+                        )
+                            canAdd.set(true);
+                        for (Map.Entry<String, DDMFormValues> entry : ddmFormValuesMap.entrySet()) {
+                            DDMFormValues ddmFormValues = entry.getValue();
+                            List<DDMFormFieldValue> ddmFormFieldValues = ddmFormValues.getDDMFormFieldValues();
+                            for (DDMFormFieldValue ddmFormFieldValue : ddmFormFieldValues) {
+
+                                if (ddmFormFieldValue.getValue().getString(ddmFormFieldValue.getValue().getDefaultLocale()).toLowerCase().contains(keyword.toLowerCase()))
+                                    canAdd.set(true);
+                            }
+                        }
+                    }
+            );
+            if (canAdd.get())
+                dlFileEntries.add(fileEntry);
+        }
+
+        return dlFileEntries;
+    }
 
     public List<Document> getDocuments(
             String title,
@@ -187,10 +274,16 @@ public class GestionDocumentLocalServiceImpl
         return search.toList();
     }
 
-    public void deleteDocument(Long documentId) throws PortalException {
+    @Indexable(type = IndexableType.DELETE)
+    public void deleteDocument(Long documentId, ServiceContext serviceContext) throws PortalException {
         DLFileEntry fileEntry = DLFileEntryLocalServiceUtil.getFileEntry(documentId);
         DLAppServiceUtil.deleteFileEntry(documentId);
         deleteFolder(fileEntry.getFolder());
+        this.audit(
+                EventTypes.DELETE,
+                fileEntry,
+                userLocalService.getUser(serviceContext.getUserId())
+        );
     }
 
     private void deleteFolder(DLFolder folder) throws PortalException {
@@ -304,4 +397,55 @@ public class GestionDocumentLocalServiceImpl
             );
         }
     }
+
+    private void audit(
+            String eventType,
+            DLFileEntry fileEntry,
+            User user
+    ) {
+        try {
+
+            JSONObject additionalInfoJSONObject = getAdditionalInfoJSONObject(fileEntry);
+
+            AuditMessage auditMessage = new AuditMessage(
+                    eventType,
+                    user.getCompanyId(),
+                    user.getUserId(),
+                    user.getFullName(),
+                    DLFileEntry.class.getName(),
+                    String.valueOf(fileEntry.getFileEntryId()),
+                    "",
+                    new Date(),
+                    additionalInfoJSONObject
+            );
+
+            _auditRouter.route(auditMessage);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ModelListenerException(e);
+        }
+    }
+
+    private JSONObject getAdditionalInfoJSONObject(
+            DLFileEntry fileEntry
+    ) throws PortalException {
+        JSONObject additionalInfoJSONObject =
+                JSONFactoryUtil.createJSONObject();
+        additionalInfoJSONObject.put("title", fileEntry.getTitle());
+        additionalInfoJSONObject.put("description", fileEntry.getDescription());
+        additionalInfoJSONObject.put("fileEntryId", fileEntry.getFileEntryId());
+        additionalInfoJSONObject.put("groupId", fileEntry.getGroupId());
+        additionalInfoJSONObject.put("companyId", fileEntry.getCompanyId());
+        additionalInfoJSONObject.put("isInTrash", fileEntry.isInTrash());
+        additionalInfoJSONObject.put("fileEntryTypeId", fileEntry.getFileEntryTypeId());
+        additionalInfoJSONObject.put("fileEntryTypeIdName", fileEntry.getDLFileEntryType().getName(LocaleUtil.getDefault()));
+        additionalInfoJSONObject.put("userId", fileEntry.getUserId());
+        additionalInfoJSONObject.put("userName", fileEntry.getUserName());
+        additionalInfoJSONObject.put("createDate", fileEntry.getCreateDate());
+        additionalInfoJSONObject.put("modifiedDate", fileEntry.getModifiedDate());
+        additionalInfoJSONObject.put("folderId", fileEntry.getFolderId());
+        return additionalInfoJSONObject;
+    }
+
 }

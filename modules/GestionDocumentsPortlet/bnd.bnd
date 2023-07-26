@@ -1,0 +1,4 @@
+Bundle-Name: GestionDocumentsPortlet
+Bundle-SymbolicName: com.liferay.gwenod.gd.portlet
+Bundle-Version: 1.0.0
+Export-Package: com.liferay.gwenod.gd.portlet.constants

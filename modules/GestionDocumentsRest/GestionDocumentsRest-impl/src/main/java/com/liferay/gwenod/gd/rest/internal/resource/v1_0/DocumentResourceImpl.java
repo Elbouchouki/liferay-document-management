@@ -12,7 +12,6 @@ import com.liferay.gwenod.gd.service.service.GestionDocumentLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -103,7 +102,7 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
         Response.ResponseBuilder responseBuilder = Response.ok();
 
         try {
-            gestionDocumentLocalService.deleteDocument(documentId);
+            gestionDocumentLocalService.deleteDocument(documentId, _ServiceContextBuilder());
         } catch (NoSuchFileEntryException e) {
             responseBuilder.status(Response.Status.NOT_FOUND);
             responseBuilder.entity(
@@ -355,27 +354,6 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
         if (dlFileVersion.getDLFileEntryType() != null) {
             documentDto.setFileEntryTypeIdName(dlFileVersion.getDLFileEntryType().getName(Locale.US));
         }
-        return documentDto;
-    }
-
-    private Document toDocument(FileEntry document) {
-        Document documentDto = new Document();
-        documentDto.setFileEntryId(document.getFileEntryId());
-        documentDto.setFileName(document.getFileName());
-        documentDto.setDescription(document.getDescription());
-        documentDto.setFolderId(document.getFolderId());
-        documentDto.setTitle(document.getTitle());
-        documentDto.setRepositoryId(document.getRepositoryId());
-        /*documentDto.setAddress(document.getAddress());  */
-        /*documentDto.setChangeLog(document.getChangeLog());*/
-        /*documentDto.setCity(document.getCity());*/
-        documentDto.setVersion(document.getVersion());
-        documentDto.setMimeType(document.getMimeType());
-        documentDto.setGroupId(document.getGroupId());
-        documentDto.setUserId(document.getUserId());
-        documentDto.setCompanyId(document.getCompanyId());
-        documentDto.setCreateDate(document.getCreateDate());
-        documentDto.setModifiedDate(document.getModifiedDate());
         return documentDto;
     }
 

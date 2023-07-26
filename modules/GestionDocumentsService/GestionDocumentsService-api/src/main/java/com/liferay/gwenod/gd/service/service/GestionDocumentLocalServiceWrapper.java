@@ -95,10 +95,12 @@ public class GestionDocumentLocalServiceWrapper
 	}
 
 	@Override
-	public void deleteDocument(Long documentId)
+	public void deleteDocument(
+			Long documentId,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
-		_gestionDocumentLocalService.deleteDocument(documentId);
+		_gestionDocumentLocalService.deleteDocument(documentId, serviceContext);
 	}
 
 	/**
@@ -376,6 +378,18 @@ public class GestionDocumentLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _gestionDocumentLocalService.getPersistedModel(primaryKeyObj);
+	}
+
+	@Override
+	public java.util.List<com.liferay.document.library.kernel.model.DLFileEntry>
+			searchByKeywords(
+				long userId, String keywords, String fileType, int start,
+				int end,
+				com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _gestionDocumentLocalService.searchByKeywords(
+			userId, keywords, fileType, start, end, serviceContext);
 	}
 
 	@Override
