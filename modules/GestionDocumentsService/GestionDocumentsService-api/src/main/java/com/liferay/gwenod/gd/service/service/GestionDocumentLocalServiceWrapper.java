@@ -384,12 +384,13 @@ public class GestionDocumentLocalServiceWrapper
 	public java.util.List<com.liferay.document.library.kernel.model.DLFileEntry>
 			searchByKeywords(
 				long userId, String keywords, String fileType, int start,
-				int end,
+				int end, String fromDate, String toDate,
 				com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _gestionDocumentLocalService.searchByKeywords(
-			userId, keywords, fileType, start, end, serviceContext);
+			userId, keywords, fileType, start, end, fromDate, toDate,
+			serviceContext);
 	}
 
 	@Override

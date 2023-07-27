@@ -294,7 +294,8 @@ public interface GestionDocumentLocalService
 	public List<com.liferay.document.library.kernel.model.DLFileEntry>
 			searchByKeywords(
 				long userId, String keywords, String fileType, int start,
-				int end, ServiceContext serviceContext)
+				int end, String fromDate, String toDate,
+				ServiceContext serviceContext)
 		throws PortalException;
 
 	@Indexable(type = IndexableType.REINDEX)

@@ -24,12 +24,12 @@ public class DlFileEntryModelDocumentContributor implements ModelDocumentContrib
         // Strip HTML.
 
         String description = HtmlUtil.escape(dlFileEntry.getDescription());
-        document.addText(Field.DESCRIPTION, description);
+//        document.addText(Field.DESCRIPTION, description);
 
         String title = HtmlUtil.escape(dlFileEntry.getTitle());
-        document.addText(Field.TITLE, title);
+//        document.addText(Field.TITLE, title);
 
-        document.addDate(Field.MODIFIED_DATE, dlFileEntry.getModifiedDate());
+//        document.addDate(Field.MODIFIED_DATE, dlFileEntry.getModifiedDate());
 
         // Handle localized fields.
 

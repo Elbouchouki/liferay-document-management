@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.search.*;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -41,6 +42,7 @@ import org.osgi.service.component.annotations.Reference;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -203,6 +205,8 @@ public class GestionDocumentLocalServiceImpl
             String fileType,
             int start,
             int end,
+            String fromDate,
+            String toDate,
             ServiceContext serviceContext
     ) throws PortalException {
         List<DLFileEntry> dlFileEntries = new ArrayList<>();
@@ -214,8 +218,21 @@ public class GestionDocumentLocalServiceImpl
         sc.setCompanyId(serviceContext.getCompanyId());
         sc.setGroupIds(new long[]{serviceContext.getScopeGroupId()});
         sc.setSorts(new Sort(Field.MODIFIED_DATE, Sort.LONG_TYPE, true));
+
         Hits hits = indexer.search(sc);
         List<String> keywordsList = Arrays.asList(keywords.split(" "));
+
+        Date from = null;
+        Date to = null;
+        try {
+            if (fromDate != null && !fromDate.isEmpty())
+                from = DateUtil.parseDate("yyyy-MM-dd HH:mm:ss", fromDate + " 00:00:00", Locale.getDefault());
+            if (toDate != null && !toDate.isEmpty())
+                to = DateUtil.parseDate("yyyy-MM-dd HH:mm:ss", toDate + " 23:59:59", Locale.getDefault());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
         for (Document doc : hits.toList()) {
             long fileEntryId = GetterUtil.getLong(doc.get("entryClassPK"));
             DLFileEntry fileEntry = DLFileEntryLocalServiceUtil
@@ -228,7 +245,6 @@ public class GestionDocumentLocalServiceImpl
             if (fileType != null && !fileType.isEmpty() && !fileType.equals("ALL"))
                 if (!fileEntry.getDLFileEntryType().getName(Locale.getDefault()).equals(fileType))
                     continue;
-
 
             keywordsList.forEach(
                     keyword -> {
@@ -248,8 +264,15 @@ public class GestionDocumentLocalServiceImpl
                         }
                     }
             );
-            if (canAdd.get())
+            if (canAdd.get()) {
+                if (from != null)
+                    if (fileEntry.getCreateDate().before(from))
+                        continue;
+                if (to != null)
+                    if (fileEntry.getCreateDate().after(to))
+                        continue;
                 dlFileEntries.add(fileEntry);
+            }
         }
 
         return dlFileEntries;

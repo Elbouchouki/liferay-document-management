@@ -10,7 +10,6 @@
 <%@ taglib uri="http://liferay.com/tld/clay" prefix="clay" %>
 
 
-<%@ page import="com.liferay.gwenod.gd.portlet.context.FileEntryManagementToolbarDisplayContext" %>
 <%@ page import="com.liferay.document.library.kernel.model.DLFileEntry" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.liferay.document.library.kernel.model.DLFileVersion" %>

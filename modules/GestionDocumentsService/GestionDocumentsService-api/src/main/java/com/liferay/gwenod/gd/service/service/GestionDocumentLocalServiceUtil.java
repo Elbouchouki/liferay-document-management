@@ -337,12 +337,13 @@ public class GestionDocumentLocalServiceUtil {
 	public static List<com.liferay.document.library.kernel.model.DLFileEntry>
 			searchByKeywords(
 				long userId, String keywords, String fileType, int start,
-				int end,
+				int end, String fromDate, String toDate,
 				com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws PortalException {
 
 		return getService().searchByKeywords(
-			userId, keywords, fileType, start, end, serviceContext);
+			userId, keywords, fileType, start, end, fromDate, toDate,
+			serviceContext);
 	}
 
 	public static com.liferay.document.library.kernel.model.DLFileEntry
